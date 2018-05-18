@@ -12,9 +12,8 @@ def main(argv=sys.argv):
     try:
         os.makedirs("songs")
     except:
-        #remove all the files in the songs directory
-        #is this line necessary
-        pass
+        for file in os.listdir("songs"):
+            os.remove(os.path.join("songs",file))
 
     browser = webdriver.Firefox()
     browser.get("https://www.ultimate-guitar.com/explore")
@@ -23,21 +22,26 @@ def main(argv=sys.argv):
         search = browser.find_element_by_tag_name("input")
         search.clear()
         search.send_keys(artist + Keys.RETURN)
-        
         time.sleep(5)
 
-        #if artist doesn't exist, continue
-
-        #create a set of songs for this artist
-        num_tabs = browser.find_element_by_class_name("_2PyWj")
+        try:
+            num_tabs = browser.find_element_by_class_name("_2PyWj")
+        except:
+            continue
+       
+        songs = {}
         num_tabs = int(num_tabs.text.split()[0])
         for page in range(1,math.ceil(num_tabs/50)+1):
             if page > 1:
                 num_tabs -= 50
-                next = browser.find_element_by_partial_link_text("page=" + str(page))
+                next = browser.find_element_by_link_text(str(page))
                 next.click()
                 time.sleep(5)
-            for tab in range(math.min(num_tabs,50)):
+            tabs = browser.find_elements_by_class_name("_1iQi2")
+            for tab in range(1,len(tabs)):
+                print(tabs[tab].text)
+                print()
+                #get song title by regex (op artist name) text (before opt parenthesis or * or # or new line character)
                 #if the song text before optional parenthesis
                 #doesn't match a song in the song set, 
                     #click on the link
