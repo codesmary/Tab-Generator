@@ -2,6 +2,7 @@ import sys
 import time
 import os
 import math
+import re
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -39,9 +40,18 @@ def main(argv=sys.argv):
                 time.sleep(5)
             tabs = browser.find_elements_by_class_name("_1iQi2")
             for tab in range(1,len(tabs)):
-                print(tabs[tab].text)
-                print()
-                #get song title by regex (op artist name) text (before opt parenthesis or * or # or new line character)
+                title = tabs[tab].text
+                remove = re.compile(r'((^(' + artist + r')+(\n)+)|((^(Misc Unsigned Bands)+(\n)+)*(' + artist +'\s[-]\s)+)|((.*?((ft.|feat.) '+ artist + r')))+(\n)+)')
+                remove_matches = remove.search(title)
+                if remove_matches != None:
+                    title = title.replace(remove_matches.group(),"")
+
+
+                remove = re.compile(r'(\s*[(\*\n]+(.|\n)*)|(\n+[\s\S]*)')
+                remove_matches = remove.search(title)
+                if remove_matches != None:
+                    title = title.replace(remove_matches.group(),"")
+                print(title)
                 #if the song text before optional parenthesis
                 #doesn't match a song in the song set, 
                     #click on the link
