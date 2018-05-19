@@ -10786,3 +10786,101 @@ JavaScript error: https://tpc.googlesyndication.com/safeframe/1-0-27/html/contai
 [Child 28592, Chrome_ChildThread] WARNING: pipe error: Broken pipe: file /build/firefox-AIw0T6/firefox-60.0.1+build2/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 709
 [Child 28592, Chrome_ChildThread] WARNING: pipe error: Broken pipe: file /build/firefox-AIw0T6/firefox-60.0.1+build2/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 709
 [Child 28592, Chrome_ChildThread] WARNING: pipe error: Broken pipe: file /build/firefox-AIw0T6/firefox-60.0.1+build2/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 709
+1526687888035	geckodriver	INFO	geckodriver 0.20.1
+1526687888039	geckodriver	INFO	Listening on 127.0.0.1:49575
+1526687889049	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-profile" "/tmp/rust_mozprofile.d8ZHm1nWhiZr"
+1526687893207	Marionette	INFO	Listening on port 43515
+1526687893266	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2800: TypeError: body.match is not a function
+ATTENTION: default value of option force_s3tc_enable overridden by environment.
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2800: TypeError: body.match is not a function
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2800: TypeError: body.match is not a function
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2800: TypeError: body.match is not a function
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2800: TypeError: body.match is not a function
+JavaScript error: https://www.ultimate-guitar.com/search.php?search_type=title&value=Julia%20Nunes, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/search.php?search_type=title&value=Julia%20Nunes, line 2800: TypeError: body.match is not a function
+JavaScript warning: https://dco-assets.everestads.net/ics-campaign///ad-templates/global/jquery-2.0.3_edge.4.0.1.min.js, line 1: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://dco-assets.everestads.net/ics-campaign///ad-templates/global/jquery-2.0.3_edge.4.0.1.min.js, line 1: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript error: https://tpc.googlesyndication.com/safeframe/1-0-27/html/container.html, line 10: SecurityError: Permission denied to access property "pbjs" on cross-origin object
+
+###!!! [Child][MessageChannel] Error: (msgtype=0x2C00AF,name=PContent::Msg_ScriptError) Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][MessageChannel] Error: (msgtype=0x2C00AF,name=PContent::Msg_ScriptError) Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1526688364582	geckodriver	INFO	geckodriver 0.20.1
+1526688364586	geckodriver	INFO	Listening on 127.0.0.1:36209
+1526688365599	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-profile" "/tmp/rust_mozprofile.pnAQg1BLqUO9"
+1526688369550	Marionette	INFO	Listening on port 39175
+1526688369615	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/explore, line 2800: TypeError: body.match is not a function
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://s0.2mdn.net/instream/video/client.js, line 32: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://www.ultimate-guitar.com/search.php?search_type=title&value=Julia%20Nunes, line 2366: TypeError: inner_error is undefined
+JavaScript error: https://www.ultimate-guitar.com/search.php?search_type=title&value=Julia%20Nunes, line 2800: TypeError: body.match is not a function
+JavaScript error: https://tpc.googlesyndication.com/safeframe/1-0-27/html/container.html, line 10: SecurityError: Permission denied to access property "pbjs" on cross-origin object

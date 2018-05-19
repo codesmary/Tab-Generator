@@ -41,19 +41,19 @@ def main(argv=sys.argv):
             tabs = browser.find_elements_by_class_name("_1iQi2")
             for tab in range(1,len(tabs)):
                 title = tabs[tab].text
-                remove = re.compile(r'((^(' + artist + r')+(\n)+)|((^(Misc Unsigned Bands)+(\n)+)*(' + artist +'\s[-]\s)+)|((.*?((ft.|feat.) '+ artist + r')))+(\n)+)')
-                remove_matches = remove.search(title)
-                if remove_matches != None:
-                    title = title.replace(remove_matches.group(),"")
-
-
-                remove = re.compile(r'(\s*[(\*\n]+(.|\n)*)|(\n+[\s\S]*)')
-                remove_matches = remove.search(title)
-                if remove_matches != None:
-                    title = title.replace(remove_matches.group(),"")
+                #remove clutter before song title (4 variations)
+                #1. the artist name + "\n"
+                #2. "Misc Unsigned Bands\n"
+                #3. "Misc Unsigned Bands\n" and the artist name followed by a dash
+                #4. Another artist, followed by ft. or feat. and the artist name
+                title = remove(title,r'((^(' + artist + r')+(\n)+)|((^(Misc Unsigned Bands)+(\n)+)*(' + artist + r'\s[-]\s)+)|((.*?((ft.|feat.) '+ artist + r')))+(\n)+)')
+                #remove clutter after song title (3 variations)
+                #1. (ver #) and all following text
+                #2. * and all following text (* indicates a simplified tab)
+                #3. "\n" and all following text (song title will be contained in the first line)
+                title = remove(title,r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
                 print(title)
-                #if the song text before optional parenthesis
-                #doesn't match a song in the song set, 
+                #if the song text doesn't match a song in the song set
                     #click on the link
                     #create a file
                     #write the lyrics to a file
@@ -61,6 +61,13 @@ def main(argv=sys.argv):
                     #click on the back button
     
     browser.close()
+
+def remove(song,filler):
+    remove = re.compile(filler)
+    remove_matches = remove.search(song)
+    if remove_matches != None:
+        song = song.replace(remove_matches.group(),"")
+    return song
 
 if __name__ == "__main__":
     main()
