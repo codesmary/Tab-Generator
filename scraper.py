@@ -5,6 +5,7 @@ import math
 import re
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+#from song import Song
 
 def main(argv=sys.argv):
     #replace with getting input from the command line
@@ -54,28 +55,33 @@ def main(argv=sys.argv):
                 #3. "\n" and all following text (song title will be contained in the first line)
                 title = remove(title,r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
                 if title not in songs:
-                    songs.add(title)
                     #click on the link
-                    song_link = browser.find_element_by_partial_link_text(title)
-                    song_link.click()
-                    time.sleep(5)
-                    #create a file
-                    song_name = title.replace(" ","_") + ".txt"
-                    file = open(os.path.join("songs",song_name),"w")
-                    #write the lyrics to a file
-                    lyrics = browser.find_element_by_class_name("_1YgOS")
-                    lyrics = lyrics.text
-                    file.write(lyrics)
-                    file.close()
-                    
-                    try:
-                        close_popup = browser.find_element_by_link_text("No, thanks. I'm not looking for easy way")
-                        close_popup.close()
-                    except:
-                        pass
-                    
-                    browser.back()
-                    time.sleep(5)
+                    song_links = browser.find_elements_by_partial_link_text(title)
+                    for song in range(len(song_links)):
+                        song_links = browser.find_elements_by_partial_link_text(title)
+                        song = song_links[song]
+                        song.click()
+                        time.sleep(5)
+                        #create a file
+                        song_name = title.replace(" ","_") + ".txt"
+                        file = open(os.path.join("songs",song_name),"w")
+                        #if the tab is valid, write the word list for the
+                        #tab to a file and break the for loop
+                        lyrics = browser.find_element_by_class_name("_1YgOS")
+                        lyrics = lyrics.text
+                        
+                        file.write(lyrics)
+                        file.close()
+                        
+                        try:
+                            browser.back()
+                        except:
+                            #need to fix, not capturing pop up link
+                            popup = browser.find_element_by_class_name("ad-layer-start--link")
+                            popup.close()
+                            browser.back()
+
+                        time.sleep(5)
     browser.close()
 
 def remove(song,filler):
