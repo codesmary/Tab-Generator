@@ -24,7 +24,7 @@ def main(argv=sys.argv):
         search = browser.find_element_by_tag_name("input")
         search.clear()
         search.send_keys(artist + Keys.RETURN)
-        time.sleep(5)
+        time.sleep(2)
 
         try:
             num_tabs = browser.find_element_by_class_name("_2PyWj")
@@ -38,7 +38,7 @@ def main(argv=sys.argv):
                 num_tabs -= 50
                 next = browser.find_element_by_link_text(str(page))
                 next.click()
-                time.sleep(5)
+                time.sleep(2)
             tabs = browser.find_elements_by_class_name("_1iQi2")
             for tab in range(1,len(tabs)):
                 tabs = browser.find_elements_by_class_name("_1iQi2")
@@ -61,27 +61,30 @@ def main(argv=sys.argv):
                         song_links = browser.find_elements_by_partial_link_text(title)
                         song = song_links[song]
                         song.click()
-                        time.sleep(5)
+                        time.sleep(2)
                         #create a file
                         song_name = title.replace(" ","_") + ".txt"
                         file = open(os.path.join("songs",song_name),"w")
                         #if the tab is valid, write the word list for the
                         #tab to a file and break the for loop
                         lyrics = browser.find_element_by_class_name("_1YgOS")
+                        time.sleep(2)
                         lyrics = lyrics.text
                         
                         file.write(lyrics)
+                        print(lyrics)
                         file.close()
                         
                         try:
                             browser.back()
                         except:
-                            #need to fix, not capturing pop up link
                             popup = browser.find_element_by_class_name("ad-layer-start--link")
-                            popup.close()
+                            time.sleep(2)
+                            popup.click()
+                            time.sleep(2)
                             browser.back()
-
-                        time.sleep(5)
+                        
+                        time.sleep(2)
     browser.close()
 
 def remove(song,filler):
