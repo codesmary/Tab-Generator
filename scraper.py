@@ -74,7 +74,12 @@ def main(argv=sys.argv):
                         file.write(lyrics)
                         print(lyrics)
                         file.close()
-                        
+                        #this is giving me trouble, so i think i'm going to make
+                        #it so that it appends new information, and it reruns itself
+                        #starting from that new start point until it successfully
+                        #gets all the songs
+                        #for now, just going to work on regex to get tab information
+                        #to be successful, it should match some minimum amount of information
                         try:
                             browser.back()
                         except:
