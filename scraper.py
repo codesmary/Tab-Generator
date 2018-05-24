@@ -5,7 +5,7 @@ import math
 import re
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-#from song import Song
+from song import Song
 
 def main(argv=sys.argv):
     #replace with getting input from the command line
@@ -67,20 +67,19 @@ def main(argv=sys.argv):
                         song_name = title.replace(" ","_") + ".txt"
                         file = open(os.path.join("songs",song_name),"w")
                         #if the tab is valid, write the word list for the
-                        #tab to a file and break the for loop
+                        #tab to a shelf file and break the for loop
                         lyrics = browser.find_element_by_class_name("_1YgOS")
                         time.sleep(2)
                         lyrics = lyrics.text
                         
                         file.write(lyrics)
-                        print(lyrics)
+                        song = Song(lyrics)
+                        print('\n\n')
                         file.close()
                         #this is giving me trouble, so i think i'm going to make
                         #it so that it appends new information, and it reruns itself
                         #starting from that new start point until it successfully
                         #gets all the songs
-                        #for now, just going to work on regex to get tab information
-                        #to be successful, it should match some minimum amount of information
                         try:
                             browser.back()
                         except:

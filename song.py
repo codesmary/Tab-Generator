@@ -64,6 +64,7 @@ class Song:
             match_len += len(match.group())
         #if a small percentage of the tab was correct matches, then return error
         if match_len / len(tab) < 0.5:
+            print('unsuccessful tab')
             return None
         else:
             for lyric in lyrics:
