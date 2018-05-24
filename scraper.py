@@ -40,6 +40,7 @@ def main(argv=sys.argv):
                 next.click()
                 time.sleep(2)
             tabs = browser.find_elements_by_class_name("_1iQi2")
+            #and filter to contain ukulele tabs only
             for tab in range(1,len(tabs)):
                 tabs = browser.find_elements_by_class_name("_1iQi2")
                 title = tabs[tab].text
