@@ -2,15 +2,16 @@ from word import Word
 import re
 
 class Song:
-    def __init__(self, raw_tab):
+    def __init__(self, title, raw_tab):
         lyrics = self.generate_tab(raw_tab)
         if lyrics != None:
             self.valid = True
             self.lyrics = lyrics
+            self.title = title
 
     def generate_tab(self, tab):
         lyrics = []
-        line = re.compile(r"^([ ]*([a-gA-GIiJjMmNnSsUu./\\\-#*1-9\[\]()][ ]*)+)\n([A-zÀ-ú0-9,:;''’\".()\-\?! ]+\n{0,2})", re.MULTILINE)
+        line = re.compile(r"^([ ]*([a-gA-GIiJjMmNnSsUu./\\\-#*1-9\[\]()][ ]*)+)\n([A-zÀ-ú0-9,:;''’\".()\-\?! ]+\n{1,2})", re.MULTILINE)
         line_matches = line.finditer(tab)
         match_len = 0
         for match in line_matches:
@@ -19,8 +20,8 @@ class Song:
             chord_ptr = 0
             word_ptr = 0
             #print(str(len(chords)) + ' ' + str(len(words)))
-            #print(chords)
-            #print(words)
+            #print('chords: ' + chords)
+            #print('words: ' + words)
             for char in range(min(len(chords),len(words))-1):
                 if words[char+1] == ' ' or words[char+1] == '\n':
                     end = char+1
@@ -48,7 +49,8 @@ class Song:
                 remaining = chords[chord_ptr:].split()
                 if len(remaining) > 0:
                     #remove trailing white space
-                    lyrics[-1].word = lyrics[-1].word[:-1]
+                    if len(lyrics) > 0 and lyrics[-1].word != None:
+                        lyrics[-1].word = lyrics[-1].word[:-1]
                     for chord in remaining:
                         if 'N' not in chord.upper() or 'C' not in chord.upper():
                             lyrics.append(Word(chord,None,'mid'))
@@ -85,7 +87,7 @@ class Song:
                     lyrics[-1].chord = chords[ptr:].strip()
             match_len += len(match.group())
         #if a small percentage of the tab was correct matches, then return error
-        if match_len / len(tab) < 0.7:
+        if match_len / len(tab) < 0.65:
             print('unsuccessful tab: ' + str(match_len/len(tab)) + '%')
             return None
         else:

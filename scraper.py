@@ -8,9 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from song import Song
 
 def main(argv=sys.argv):
-    #replace with getting input from the command line
-    artists = ["Conan Gray", "Julia Nunes", "Remo Drive"]
-
+    artists = ["Conan Gray", "Julia Nunes"]
     try:
         os.makedirs("songs")
     except:
@@ -40,9 +38,8 @@ def main(argv=sys.argv):
                 next.click()
                 time.sleep(2)
             tabs = browser.find_elements_by_class_name("_1iQi2")
-            #and filter to contain ukulele tabs only
             for tab in range(1,len(tabs)):
-                tabs = browser.find_elements_by_class_name("_1iQi2")
+                #tabs = browser.find_elements_by_class_name("_1iQi2")
                 title = tabs[tab].text
                 #remove clutter before song title (4 variations)
                 #1. the artist name + "\n"
@@ -55,41 +52,38 @@ def main(argv=sys.argv):
                 #2. * and all following text (* indicates a simplified tab)
                 #3. "\n" and all following text (song title will be contained in the first line)
                 title = remove(title,r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
-                if title not in songs:
+                if title not in songs and 'Ukulele' in tabs[tab].text:
                     #click on the link
-                    song_links = browser.find_elements_by_partial_link_text(title)
-                    for song in range(len(song_links)):
-                        song_links = browser.find_elements_by_partial_link_text(title)
-                        song = song_links[song]
-                        song.click()
+                    song = tabs[tab].find_element_by_partial_link_text(title)
+                    song.click()
+                    time.sleep(2)
+                    #create a file
+                    song_name = title.replace(" ","_") + ".txt"
+                    file = open(os.path.join("songs",song_name),"w")
+                    #if the tab is valid, write the word list for the
+                    #tab to a shelf file and break the for loop
+                    lyrics = browser.find_element_by_class_name("_1YgOS")
+                    time.sleep(2)
+                    lyrics = lyrics.text
+                    
+                    file.write(lyrics)
+                    song = Song(title,lyrics)
+                    print('\n\n')
+                    file.close()
+                    #this is giving me trouble, so i think i'm going to make
+                    #it so that it appends new information, and it reruns itself
+                    #starting from that new start point until it successfully
+                    #gets all the songs
+                    try:
+                        browser.back()
+                    except:
+                        popup = browser.find_element_by_class_name("ad-layer-start--link")
                         time.sleep(2)
-                        #create a file
-                        song_name = title.replace(" ","_") + ".txt"
-                        file = open(os.path.join("songs",song_name),"w")
-                        #if the tab is valid, write the word list for the
-                        #tab to a shelf file and break the for loop
-                        lyrics = browser.find_element_by_class_name("_1YgOS")
+                        popup.click()
                         time.sleep(2)
-                        lyrics = lyrics.text
-                        
-                        file.write(lyrics)
-                        song = Song(lyrics)
-                        print('\n\n')
-                        file.close()
-                        #this is giving me trouble, so i think i'm going to make
-                        #it so that it appends new information, and it reruns itself
-                        #starting from that new start point until it successfully
-                        #gets all the songs
-                        try:
-                            browser.back()
-                        except:
-                            popup = browser.find_element_by_class_name("ad-layer-start--link")
-                            time.sleep(2)
-                            popup.click()
-                            time.sleep(2)
-                            browser.back()
-                        
-                        time.sleep(2)
+                        browser.back()
+                    
+                    time.sleep(2)
     browser.close()
 
 def remove(song,filler):
