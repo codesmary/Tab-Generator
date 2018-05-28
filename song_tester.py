@@ -1,6 +1,6 @@
 from song import Song
 
-file = open("Idle_Town.txt", "r")
+file = open("test_song.txt", "r")
 lyrics = file.read()
 file.close()
 song = Song(lyrics)

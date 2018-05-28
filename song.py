@@ -85,8 +85,8 @@ class Song:
                     lyrics[-1].chord = chords[ptr:].strip()
             match_len += len(match.group())
         #if a small percentage of the tab was correct matches, then return error
-        if match_len / len(tab) < 0.5:
-            print('unsuccessful tab')
+        if match_len / len(tab) < 0.7:
+            print('unsuccessful tab: ' + str(match_len/len(tab)) + '%')
             return None
         else:
             for lyric in lyrics:
@@ -97,7 +97,7 @@ class Song:
                     if lyric.pos == 'beg':
                         print('(' + lyric.chord + ') ',end='')
                     elif lyric.pos == 'mid':
-                        print('(' + lyric.chord + ')',end='')
+                        print(' (' + lyric.chord + ')',end='')
                     else:
                         print(' (' + lyric.chord + ')\t\n',end='')
             return lyrics
