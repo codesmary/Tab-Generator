@@ -8,14 +8,16 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from song import Song
 
-#i have not been able to test this past the first page for any artist
-#(not for lack of trying, spent an hour trying)
-#will make faster, then test to see if it works okay for other pages
-
 browser = webdriver.Firefox()
+#TODO these constants need to be changed to optimize for best
+#performance, but there's no point tweaking until
+#the song creation is done (so know how long must be spent on
+#each page) and the implicit timing is set in this file
+LONG_STALL = 40
+SHORT_STALL = 30
 
 def main():
-    artists = ['Conan Gray', 'Julia Nunes']
+    artists = ['Julia Nunes', 'Conan Gray']
     training_data = []
     data_shelf = shelve.open('song_data')
     browser.get('https://www.ultimate-guitar.com/explore')
@@ -26,6 +28,10 @@ def main():
         #duplicate song data
         songs = set()
         
+        #reset timeout to default with each artist
+        browser.set_page_load_timeout(LONG_STALL)
+        print(LONG_STALL)
+
         #search tab website for artist
         search = browser.find_element_by_tag_name('input')
         search.clear()
@@ -40,6 +46,9 @@ def main():
         last_page = math.ceil(num_tabs/50)+1
         for page in range(1, last_page):
             if page > 1:
+                #reset timeout to default with each new page
+                browser.set_page_load_timeout(LONG_STALL)
+                print(LONG_STALL)
                 num_tabs -= 50
                 #TODO replace with selenium implicit stalling
                 next = browser.find_element_by_link_text(str(page))
@@ -47,7 +56,6 @@ def main():
                 time.sleep(2)
             tabs = browser.find_elements_by_class_name('_1iQi2')
             for tab in range(1,len(tabs)):
-                #TODO possibly shorten stall time length?
                 try:
                     song = first_scrape(songs,artist,tab)
                 except:
@@ -70,6 +78,10 @@ def first_scrape(songs, artist, tab_index):
     title = remove(title,r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
 
     if title not in songs and 'Ukulele' in tab.text:
+        #assert that a simple scrape should take no
+        #longer than 5 seconds to switch between pages
+        browser.set_page_load_timeout(SHORT_STALL)
+        print(SHORT_STALL)
         #TODO replace with selenium implicit stalling
         song_link = tab.find_element_by_partial_link_text(title)
         song_link.click()
@@ -88,6 +100,9 @@ def first_scrape(songs, artist, tab_index):
 
 def recursive_scrape(songs, artist, page, tab_index):
     global browser
+    #reset timeout to 30 seconds to initialize page
+    browser.set_page_load_timeout(LONG_STALL)
+    print(LONG_STALL)
     browser.close()
     browser = webdriver.Firefox()
     browser.get('https://www.ultimate-guitar.com/explore')
@@ -101,7 +116,6 @@ def recursive_scrape(songs, artist, page, tab_index):
         next = browser.find_element_by_link_text(str(page))
         next.click()
         time.sleep(2)
-    #TODO possibly shorten stall time length?
     try:
         song = first_scrape(songs,artist,tab_index)
     except:
