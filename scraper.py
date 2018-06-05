@@ -6,6 +6,9 @@ import re
 import shelve
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from song import Song
 
 browser = webdriver.Firefox()
@@ -13,8 +16,9 @@ browser = webdriver.Firefox()
 #performance, but there's no point tweaking until
 #the song creation is done (so know how long must be spent on
 #each page) and the implicit timing is set in this file
-LONG_STALL = 40
-SHORT_STALL = 30
+LONG_STALL = 100
+SHORT_STALL = 50
+WAIT_STALL = 10
 
 def main():
     artists = ['Julia Nunes', 'Conan Gray']
@@ -22,7 +26,6 @@ def main():
     data_shelf = shelve.open('song_data')
     browser.get('https://www.ultimate-guitar.com/explore')
 
-    #TODO replace with selenium implicit stalling
     for artist in artists:
         #maintain a set of songs for each artist to avoid
         #duplicate song data
@@ -36,7 +39,12 @@ def main():
         search = browser.find_element_by_tag_name('input')
         search.clear()
         search.send_keys(artist + Keys.RETURN)
-        time.sleep(2)
+        
+        #stall program until the artist page has loaded
+        #indicated by visibility of number of tabs element
+        wait = WebDriverWait(browser,WAIT_STALL)
+        tab_locator = (By.CLASS_NAME,'_2PyWj')
+        wait.until(EC.visibility_of_element_located(tab_locator))
 
         #first number in web element is number of tabs
         num_tabs = browser.find_element_by_class_name('_2PyWj')
@@ -50,10 +58,10 @@ def main():
                 browser.set_page_load_timeout(LONG_STALL)
                 print(LONG_STALL)
                 num_tabs -= 50
-                #TODO replace with selenium implicit stalling
                 next = browser.find_element_by_link_text(str(page))
                 next.click()
-                time.sleep(2)
+                wait = WebDriverWait(browser,WAIT_STALL)
+                wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
             tabs = browser.find_elements_by_class_name('_1iQi2')
             for tab in range(1,len(tabs)):
                 try:
@@ -79,20 +87,19 @@ def first_scrape(songs, artist, tab_index):
 
     if title not in songs and 'Ukulele' in tab.text:
         #assert that a simple scrape should take no
-        #longer than 5 seconds to switch between pages
+        #longer than a short stall to switch between pages
         browser.set_page_load_timeout(SHORT_STALL)
         print(SHORT_STALL)
-        #TODO replace with selenium implicit stalling
         song_link = tab.find_element_by_partial_link_text(title)
         song_link.click()
-        time.sleep(2)
-        lyrics = browser.find_element_by_class_name('_1YgOS')
-        time.sleep(2)
-        lyrics = lyrics.text
+        wait = WebDriverWait(browser,WAIT_STALL)
+        wait.until(EC.url_contains('tab'))
+        lyrics = browser.find_element_by_class_name('_1YgOS').text
         song = Song(title,lyrics)
-        #TODO replace with selenium implicit stalling
         browser.back()
-        time.sleep(2)
+        #time.sleep(2)
+        wait = WebDriverWait(browser,WAIT_STALL)
+        wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
     else:
         song = None
 
@@ -100,7 +107,7 @@ def first_scrape(songs, artist, tab_index):
 
 def recursive_scrape(songs, artist, page, tab_index):
     global browser
-    #reset timeout to 30 seconds to initialize page
+    #reset timeout to long stall to initialize page
     browser.set_page_load_timeout(LONG_STALL)
     print(LONG_STALL)
     browser.close()
@@ -108,14 +115,15 @@ def recursive_scrape(songs, artist, page, tab_index):
     browser.get('https://www.ultimate-guitar.com/explore')
     search = browser.find_element_by_tag_name('input')
     search.clear()
-    #TODO
     search.send_keys(artist + Keys.RETURN)
-    time.sleep(2)
-    #TODO
+    wait = WebDriverWait(browser,WAIT_STALL)
+    tab_locator = (By.CLASS_NAME,'_2PyWj')
+    wait.until(EC.visibility_of_element_located(tab_locator))
     if page > 1:
         next = browser.find_element_by_link_text(str(page))
         next.click()
-        time.sleep(2)
+        wait = WebDriverWait(browser,WAIT_STALL)
+        wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
     try:
         song = first_scrape(songs,artist,tab_index)
     except:
