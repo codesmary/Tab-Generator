@@ -4,3 +4,6 @@ class Word:
         self.chord = chord
         self.word = word
         self.pos = pos
+
+    def has_chord(self):
+        return chord != None
