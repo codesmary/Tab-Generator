@@ -1,4 +1,4 @@
-from song import Song
+from song2 import Song
 
 file = open("test_song.txt", "r")
 lyrics = file.read()

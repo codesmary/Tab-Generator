@@ -9,8 +9,10 @@ class Song:
             self.lyrics = lyrics
             self.title = title
 
-#TODO it's not capturing if the chord has only one space associated with it at the beginning or end
-#TODO it's not capturing the endstanza 
+#TODO then change back to single spacing, and fix the formatting so that these are also captured
+#TODO capture endstanza
+#TODO turn position fields into boolean functions contained in word class, so net does not have to generate them on the fly
+    #preline, midline, postline, endline, endstanza
 
     #store lyrics in a vector containing word objects, which are a container for the chord/word at that position in the line
     def generate_tab(self, tab):
@@ -21,7 +23,6 @@ class Song:
         for match in line_matches:
             chords = match.group(1)
             words = match.group(3)
-##########
             chord_ptr = 0
             word_ptr = 0
             for char in range(min(len(chords),len(words)) - 1):
@@ -49,25 +50,23 @@ class Song:
                             lyrics.append(Word(chord,word,'preline'))
                         else:
                             lyrics.append(Word(chord,word,'midline'))
+            
             if len(chords) > len(words):
-                #TODO clean up with ternary operator and slicing
-                if words[-1] == '\n' and words[-2] == '\n':
-                    lyrics[-1].pos = 'endstanza'
-                else:
-                    lyrics[-1].pos = 'endline'
+                lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
+
+                #add new lines to the last word
+                for i in range(-1,-3,-1):
+                    if words[i] == '\n':
+                        lyrics[-1].word += '\n'
 
                 remaining = chords[chord_ptr:].split()
                 if remaining:
                     for chord in remaining:
                         if 'N' not in chord.upper() or 'C' not in chord.upper():
                             lyrics.append(Word(chord,None,'postline'))
-                else:
-                    #TODO does this even do anything but replace the \n with a \n
-                    lyrics[-1].word = lyrics[-1].word[:-1] + '\n'
             elif len(words) > len(chords):
                 remaining = words[word_ptr:].split()
                 #add new lines to the last word
-                #TODO where are these new lines being lost?
                 for i in range(-1,-3,-1):
                     if remaining and words[i] == '\n':
                         remaining[-1] += '\n'
@@ -86,30 +85,23 @@ class Song:
                         remaining[word] += ' '
                     lyrics.append(Word(chord,remaining[word],'midline'))
 
-                #TODO clean up with ternary operator and slicing
-                if words[-1] == '\n' and words[-2] == '\n':
-                    lyrics[-1].pos = 'endstanza'
-                else:
-                    lyrics[-1].pos = 'endline'
+                lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
 
                 chord = chords[chord_ptr:].strip()
                 if not remaining and chord and not ('N' in chord.upper() and 'C' in chord.upper()):
                     lyrics.append(Word(chord,None,'postline'))
             else:
                 lyrics[-1].word += '\n'
+
                 if chords[-1] != ' ':
                     ptr = -1
                     while chords[ptr] != ' ':
                         ptr -= 1
                     lyrics[-1].chord = chords[ptr:].strip()
-                #TODO same cleanup
-                if words[-1] == '\n' and words[-2] == '\n':
-                    lyrics[-1].pos = 'endstanza'
-                else:
-                    lyrics[-1].pos = 'endline'
+                lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
 
             match_len += len(match.group())
-#########
+        
         match_percentage = match_len / len(tab)
         if match_percentage < 0.65:
             print('unsuccessful tab: ' + str(match_percentage) + '%')
@@ -122,7 +114,8 @@ class Song:
         word_offset = 0
         chord_line = [' '] * 70
         word_line = []
-        for lyric in lyrics:
+        for lyric_index in range(len(lyrics)):
+            lyric = lyrics[lyric_index]
             chord = lyric.chord + ' ' if lyric.chord != None else ''
             word = lyric.word
             c_length = len(chord)
@@ -138,24 +131,41 @@ class Song:
                 word_line.append(word)
                 word_offset += w_length
             elif lyric.pos == 'postline': #shout out to posty
+
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
-                index += c_length
+                word_offset += c_length
+
+                if ((lyric_index + 1) % len(lyrics) != 0 and lyrics[lyric_index + 1].pos is not 'postline') or (lyric_index + 1) % len(lyrics) == 0:
+                    end_slice = len(chord_line) - 1
+                    while chord_line[end_slice] == ' ' and end_slice > -1:
+                        end_slice -= 1
+                    end_slice += 1
+                    chord_line = chord_line[:end_slice]
+                    chord_line = ''.join(chord_line) + '\n'
+                    word_line = ''.join(word_line)
+                    print(chord_line + word_line, end = '')
+
+                    word_offset = 0
+                    chord_line = [' '] * 70
+                    word_line = []
             elif lyric.pos == 'endline' or lyric.pos == 'endstanza':
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
-                w_length = len(word)
+                w_length = len(word.replace('\n',''))
                 word_line.append(word)
+                word_offset += w_length
                 
-                end_slice = len(chord_line) - 1
-                while chord_line[end_slice] == ' ' and end_slice > -1:
-                    end_slice -= 1
-                end_slice += 1
-                chord_line = chord_line[:end_slice]
-                chord_line = ''.join(chord_line) + '\n'
-                word_line = ''.join(word_line)
-                print(chord_line + word_line, end = '')
+                if ((lyric_index + 1) % len(lyrics) != 0 and lyrics[lyric_index + 1].pos is not 'postline') or (lyric_index + 1) % len(lyrics) == 0:
+                    end_slice = len(chord_line) - 1
+                    while chord_line[end_slice] == ' ' and end_slice > -1:
+                        end_slice -= 1
+                    end_slice += 1
+                    chord_line = chord_line[:end_slice]
+                    chord_line = ''.join(chord_line) + '\n'
+                    word_line = ''.join(word_line)
+                    print(chord_line + word_line, end = '')
 
-                word_offset = 0
-                chord_line = [' '] * 70
-                word_line = []
+                    word_offset = 0
+                    chord_line = [' '] * 70
+                    word_line = []
