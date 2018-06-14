@@ -9,10 +9,11 @@ class Song:
             self.lyrics = lyrics
             self.title = title
 
-#TODO then change back to single spacing, and fix the formatting so that these are also captured
 #TODO capture endstanza
+#TODO fix the formatting so that single spaced pre and post line chords are also captured
 #TODO turn position fields into boolean functions contained in word class, so net does not have to generate them on the fly
     #preline, midline, postline, endline, endstanza
+#TODO general test
 
     #store lyrics in a vector containing word objects, which are a container for the chord/word at that position in the line
     def generate_tab(self, tab):
@@ -119,6 +120,7 @@ class Song:
             chord = lyric.chord + ' ' if lyric.chord != None else ''
             word = lyric.word
             c_length = len(chord)
+
             if lyric.pos == 'preline':
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
@@ -131,7 +133,6 @@ class Song:
                 word_line.append(word)
                 word_offset += w_length
             elif lyric.pos == 'postline': #shout out to posty
-
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
                 word_offset += c_length
