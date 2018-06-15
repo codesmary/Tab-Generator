@@ -9,7 +9,6 @@ class Song:
             self.lyrics = lyrics
             self.title = title
 
-#TODO capture endstanza
 #TODO fix the formatting so that single spaced pre and post line chords are also captured
 #TODO turn position fields into boolean functions contained in word class, so net does not have to generate them on the fly
     #preline, midline, postline, endline, endstanza
@@ -18,7 +17,7 @@ class Song:
     #store lyrics in a vector containing word objects, which are a container for the chord/word at that position in the line
     def generate_tab(self, tab):
         lyrics = []
-        line = re.compile(r"^([ ]*([a-gA-GIiJjMmNnSsUu./\\\-#*1-9\[\]()][ ]*)+)\n([A-zÀ-ú0-9,:;''’\".()\-\?! ]+\n{1,2})", re.MULTILINE)
+        line = re.compile(r"^([ ]*([a-gA-GIiJjMmNnSsUu./\\\-#*1-9\[\]()][ ]*)+)\n([A-zÀ-ú0-9,:;''’\".()\-\?! ]+([ ]?\n){0,2})", re.MULTILINE)
         line_matches = line.finditer(tab)
         match_len = 0
         for match in line_matches:
@@ -54,11 +53,7 @@ class Song:
             
             if len(chords) > len(words):
                 lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
-
-                #add new lines to the last word
-                for i in range(-1,-3,-1):
-                    if words[i] == '\n':
-                        lyrics[-1].word += '\n'
+                lyrics[-1].word += '\n' * words.count('\n')
 
                 remaining = chords[chord_ptr:].split()
                 if remaining:
@@ -67,10 +62,8 @@ class Song:
                             lyrics.append(Word(chord,None,'postline'))
             elif len(words) > len(chords):
                 remaining = words[word_ptr:].split()
-                #add new lines to the last word
-                for i in range(-1,-3,-1):
-                    if remaining and words[i] == '\n':
-                        remaining[-1] += '\n'
+                if remaining:
+                    remaining[-1] += '\n' * words.count('\n')
                 rem_chords = chords[chord_ptr:].strip()
                 if 'N' in rem_chords.upper() and 'C' in rem_chords.upper():
                     rem_chords = None
