@@ -85,13 +85,11 @@ class Song:
                     lyrics.append(Word(chord,None,'postline'))
             else:
                 lyrics[-1].word += '\n'
-
-                if chords[-1] != ' ':
-                    ptr = -1
-                    while chords[ptr] != ' ':
-                        ptr -= 1
-                    lyrics[-1].chord = chords[ptr:].strip()
                 lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
+                
+                if chords[chord_ptr:]:
+                    chord = chords[chord_ptr:].strip()
+                    lyrics.append(Word(chord,None,'postline'))
 
             match_len += len(match.group())
         
@@ -127,6 +125,8 @@ class Song:
                 word_line.append(word)
                 word_offset += w_length
             elif lyric.pos == 'postline': #shout out to posty
+                #withhold the value of the \n character
+                word_offset -= 1
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
                 word_offset += c_length
