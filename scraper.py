@@ -66,7 +66,8 @@ def main():
             for tab in range(1,len(tabs)):
                 try:
                     song = first_scrape(songs,artist,tab)
-                except:
+                except Exception as e:
+                    print(e)
                     song = recursive_scrape(songs,artist,page,tab)
                 if song:
                     training_data.append(song)
@@ -97,9 +98,14 @@ def first_scrape(songs, artist, tab_index):
         lyrics = browser.find_element_by_class_name('_1YgOS').text
         song = Song(title,lyrics)
         browser.back()
-        #time.sleep(2)
-        wait = WebDriverWait(browser,WAIT_STALL)
-        wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
+        
+        #wait = WebDriverWait(browser,WAIT_STALL)
+        #wait.until(EC.url_contains('page'))
+        
+        time.sleep(2)
+        
+        #wait = WebDriverWait(browser,WAIT_STALL)
+        #wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
     else:
         song = None
 

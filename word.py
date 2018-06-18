@@ -5,5 +5,11 @@ class Word:
         self.word = word
         self.pos = pos
 
-    def has_chord(self):
-        return chord != None
+    def print(self):
+        print('word:')
+        if self.chord:
+            print(self.chord)
+        if self.word:
+            print(self.word)
+        if self.pos != 'na':
+            print(self.pos)

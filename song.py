@@ -9,10 +9,6 @@ class Song:
             self.lyrics = lyrics
             self.title = title
 
-#TODO turn position fields into boolean functions contained in word class, so net does not have to generate them on the fly
-    #preline, midline, postline, endline, endstanza
-#TODO general test
-
     #store lyrics in a vector containing word objects, which are a container for the chord/word at that position in the line
     def generate_tab(self, tab):
         lyrics = []
@@ -22,6 +18,11 @@ class Song:
         for match in line_matches:
             chords = match.group(1)
             words = match.group(3)
+
+            #add padding to the last verse
+            if '\n' not in words:
+                words += '\n'
+
             chord_ptr = 0
             word_ptr = 0
             for char in range(min(len(chords),len(words)) - 1):
@@ -46,11 +47,16 @@ class Song:
                     word_ptr = char + 1
                     if chord or word:
                         if not word:
-                            lyrics.append(Word(chord,None,'preline'))
+                            word = Word(chord,None,'preline')
+                            lyrics.append(word)
                         else:
-                            lyrics.append(Word(chord,word,'midline'))
+                            word = Word(chord,word,'midline')
+                            lyrics.append(word)
             
             if len(chords) > len(words):
+                if not lyrics[-1].word:
+                    lyrics.append(Word(None, words[word_ptr:]))
+
                 lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
                 lyrics[-1].word += '\n' * words.count('\n')
 
@@ -61,8 +67,13 @@ class Song:
                             lyrics.append(Word(chord,None,'postline'))
             elif len(words) > len(chords):
                 remaining = words[word_ptr:].split()
+
+                new_lines = '\n' * words.count('\n')
                 if remaining:
-                    remaining[-1] += '\n' * words.count('\n')
+                    remaining[-1] += new_lines
+                else:
+                    lyrics[-1].word += new_lines
+                
                 rem_chords = chords[chord_ptr:].strip()
                 if 'N' in rem_chords.upper() and 'C' in rem_chords.upper():
                     rem_chords = None
@@ -84,6 +95,7 @@ class Song:
                 if not remaining and chord and not ('N' in chord.upper() and 'C' in chord.upper()):
                     lyrics.append(Word(chord,None,'postline'))
             else:
+                #broken hereeee
                 lyrics[-1].word += '\n'
                 lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
                 
@@ -107,10 +119,10 @@ class Song:
         word_line = []
         for lyric_index in range(len(lyrics)):
             lyric = lyrics[lyric_index]
-            chord = lyric.chord + ' ' if lyric.chord != None else ''
+            chord = lyric.chord + ' ' if lyric.chord else ''
             word = lyric.word
             c_length = len(chord)
-
+            
             if lyric.pos == 'preline':
                 chord = lyric.chord
                 c_length = len(chord)
@@ -126,7 +138,7 @@ class Song:
                 word_offset += w_length
             elif lyric.pos == 'postline': #shout out to posty
                 #withhold the value of the \n character
-                word_offset -= 1
+                #word_offset -= 1
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
                 word_offset += c_length
