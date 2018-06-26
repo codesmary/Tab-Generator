@@ -8,8 +8,8 @@ class Word:
     def print(self):
         print('word:')
         if self.chord:
-            print(self.chord)
+            print('chord: ' + self.chord)
         if self.word:
-            print(self.word)
+            print('word: ' + self.word)
         if self.pos != 'na':
-            print(self.pos)
+            print('pos: ' + self.pos)

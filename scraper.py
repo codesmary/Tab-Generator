@@ -96,6 +96,10 @@ def first_scrape(songs, artist, tab_index):
         wait = WebDriverWait(browser,WAIT_STALL)
         wait.until(EC.url_contains('tab'))
         lyrics = browser.find_element_by_class_name('_1YgOS').text
+        #TODO delete temp writing
+        file = open("test_song.txt",'w')
+        file.write(lyrics)
+        file.close()
         song = Song(title,lyrics)
         browser.back()
         
