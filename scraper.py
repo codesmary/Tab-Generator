@@ -11,11 +11,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from song import Song
 
-browser = webdriver.Firefox()
-#TODO these constants need to be changed to optimize for best
-#performance, but there's no point tweaking until
-#the song creation is done (so know how long must be spent on
-#each page) and the implicit timing is set in this file
+chromeOptions = webdriver.ChromeOptions()
+prefs = {"profile.managed_default_content_settings.images":2}
+chromeOptions.add_experimental_option("prefs",prefs)
+browser = webdriver.Chrome(chrome_options=chromeOptions)
 LONG_STALL = 100
 SHORT_STALL = 50
 WAIT_STALL = 10
@@ -45,6 +44,7 @@ def main():
         wait = WebDriverWait(browser,WAIT_STALL)
         tab_locator = (By.CLASS_NAME,'_2PyWj')
         wait.until(EC.visibility_of_element_located(tab_locator))
+        #time.sleep(2)
 
         #first number in web element is number of tabs
         num_tabs = browser.find_element_by_class_name('_2PyWj')
@@ -62,7 +62,9 @@ def main():
                 next.click()
                 wait = WebDriverWait(browser,WAIT_STALL)
                 wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
+                #time.sleep(1)
             tabs = browser.find_elements_by_class_name('_1iQi2')
+            #time.sleep(1)
             for tab in range(1,len(tabs)):
                 try:
                     song = first_scrape(songs,artist,tab)
@@ -79,6 +81,7 @@ def main():
 def first_scrape(songs, artist, tab_index):
     global browser
     tabs = browser.find_elements_by_class_name('_1iQi2')
+    #time.sleep(1)
     tab = tabs[tab_index]
     #remove clutter from title and click on links to
     #ukulele songs that are new
@@ -92,10 +95,14 @@ def first_scrape(songs, artist, tab_index):
         browser.set_page_load_timeout(SHORT_STALL)
         print(SHORT_STALL)
         song_link = tab.find_element_by_partial_link_text(title)
+        #time.sleep(2)
         song_link.click()
         wait = WebDriverWait(browser,WAIT_STALL)
         wait.until(EC.url_contains('tab'))
-        lyrics = browser.find_element_by_class_name('_1YgOS').text
+        #time.sleep(3)
+        lyrics = browser.find_element_by_class_name('_1YgOS')
+        #time.sleep(2)
+        lyrics = lyrics.text
         #TODO delete temp writing
         file = open("test_song.txt",'w')
         file.write(lyrics)
@@ -103,13 +110,11 @@ def first_scrape(songs, artist, tab_index):
         song = Song(title,lyrics)
         browser.back()
         
-        #wait = WebDriverWait(browser,WAIT_STALL)
-        #wait.until(EC.url_contains('page'))
+        wait = WebDriverWait(browser,WAIT_STALL)
+        wait.until(EC.url_contains('search'))
         
-        time.sleep(2)
+        #time.sleep(2)
         
-        #wait = WebDriverWait(browser,WAIT_STALL)
-        #wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
     else:
         song = None
 
@@ -121,19 +126,25 @@ def recursive_scrape(songs, artist, page, tab_index):
     browser.set_page_load_timeout(LONG_STALL)
     print(LONG_STALL)
     browser.close()
-    browser = webdriver.Firefox()
+    chromeOptions = webdriver.ChromeOptions()
+    prefs = {"profile.managed_default_content_settings.images":2}
+    chromeOptions.add_experimental_option("prefs",prefs)
+    browser = webdriver.Chrome(chrome_options=chromeOptions)
     browser.get('https://www.ultimate-guitar.com/explore')
+    #time.sleep(1)
     search = browser.find_element_by_tag_name('input')
     search.clear()
     search.send_keys(artist + Keys.RETURN)
     wait = WebDriverWait(browser,WAIT_STALL)
     tab_locator = (By.CLASS_NAME,'_2PyWj')
     wait.until(EC.visibility_of_element_located(tab_locator))
+    #time.sleep(1)
     if page > 1:
         next = browser.find_element_by_link_text(str(page))
         next.click()
         wait = WebDriverWait(browser,WAIT_STALL)
         wait.until(EC.url_contains('https://www.ultimate-guitar.com/search.php?page=' + str(page)))
+        #time.sleep(1)
     try:
         song = first_scrape(songs,artist,tab_index)
     except:

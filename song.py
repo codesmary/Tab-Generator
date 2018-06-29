@@ -21,10 +21,16 @@ class Song:
 
             #print(chords)
             #print(words)
+            #print(len(chords))
+            #print(len(words))
 
-            if '(' not in words:
-                continue
+            #if 'beat' not in words:
+            #    continue
 
+            #add padding to the end of chords, as there is no '\n' character, and the padding
+            #will later be stripped. this helps in the chord capturing process
+            chords += ' '
+            
             #add padding to the last verse
             if '\n' not in words:
                 words += '\n'
@@ -44,7 +50,14 @@ class Song:
                         chord += chords[end]
                     chord = chord.strip()
  
-                    word = words[word_ptr:char+1].replace(' ','')
+                    word = words[word_ptr:char+1]
+                    word = word.split()
+                    if len(word) > 1:
+                        word = words[word_ptr:char+1]
+                        word = word.strip()
+                    else:
+                        word = words[word_ptr:char+1].replace(' ','')
+
                     if not chord or ('N' in chord.upper() and 'C' in chord.upper()):
                         chord = None
                     if not word:
@@ -53,20 +66,20 @@ class Song:
                         word += ' '
                     chord_ptr = end + 1
                     word_ptr = char + 1
-                    print('pos update')
-                    print(chords[chord_ptr:])
-                    print(words[word_ptr:])
+                    #print('pos update')
+                    #print(chords[chord_ptr:])
+                    #print(words[word_ptr:])
                     if chord or word:
-                        print('new word! :)')
+                        #print('new word! :)')
                         if not word:
                             word = Word(chord,None,'midline' if wordAdded else 'preline')
                             lyrics.append(word)
-                            word.print()
+                            #word.print()
                         else:
                             word = Word(chord,word,'midline')
                             lyrics.append(word)
                             wordAdded = True
-                            word.print()
+                            #word.print()
             
             if len(chords) > len(words):
                 #print('chords longer than words')
@@ -91,7 +104,7 @@ class Song:
                     lyrics.append(Word(chord, last_word))
 
                 lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
-                lyrics[-1].word += '\n' * words.count('\n')
+                lyrics[-1].word += '\n' * (words.count('\n') - lyrics[-1].word.count('\n'))
 
                 remaining = chords[chord_ptr:].split()
                 if remaining:
@@ -129,7 +142,6 @@ class Song:
                 if not remaining and chord and not ('N' in chord.upper() and 'C' in chord.upper()):
                     lyrics.append(Word(chord,None,'postline'))
             else:
-                #broken hereeee
                 lyrics[-1].word += '\n'
                 lyrics[-1].pos = 'endstanza' if words[-2:] == '\n\n' else 'endline'
                 
@@ -153,7 +165,7 @@ class Song:
         #    lyric.print()
 
         word_offset = 0
-        chord_line = [' '] * 70
+        chord_line = [' '] * 100
         word_line = []
         for lyric_index in range(len(lyrics)):
             lyric = lyrics[lyric_index]
@@ -202,7 +214,7 @@ class Song:
                     print(chord_line + word_line, end = '')
 
                     word_offset = 0
-                    chord_line = [' '] * 70
+                    chord_line = [' '] * 100
                     word_line = []
             elif lyric.pos == 'endline' or lyric.pos == 'endstanza':
                 for i in range(c_length):
@@ -222,5 +234,5 @@ class Song:
                     print(chord_line + word_line, end = '')
 
                     word_offset = 0
-                    chord_line = [' '] * 70
+                    chord_line = [' '] * 100
                     word_line = []
