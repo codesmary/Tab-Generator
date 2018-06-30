@@ -19,14 +19,6 @@ class Song:
             chords = match.group(1)
             words = match.group(3)
 
-            #print(chords)
-            #print(words)
-            #print(len(chords))
-            #print(len(words))
-
-            #if 'beat' not in words:
-            #    continue
-
             #add padding to the end of chords, as there is no '\n' character, and the padding
             #will later be stripped. this helps in the chord capturing process
             chords += ' '
@@ -66,37 +58,24 @@ class Song:
                         word += ' '
                     chord_ptr = end + 1
                     word_ptr = char + 1
-                    #print('pos update')
-                    #print(chords[chord_ptr:])
-                    #print(words[word_ptr:])
                     if chord or word:
-                        #print('new word! :)')
                         if not word:
                             word = Word(chord,None,'midline' if wordAdded else 'preline')
                             lyrics.append(word)
-                            #word.print()
                         else:
                             word = Word(chord,word,'midline')
                             lyrics.append(word)
                             wordAdded = True
-                            #word.print()
             
             if len(chords) > len(words):
-                #print('chords longer than words')
-                #print('*******************')
-                #print(chords)
-                #print(words)
-                #print(chords[chord_ptr:])
-                #print(words[word_ptr:])
-
                 last_word = words[word_ptr:]
-                last_word = last_word.replace(' ','')
+                last_word = last_word.strip()
                 if last_word:
                     last_word_len = len(last_word)
                     end_ptr = word_ptr + last_word_len
                     while chords[end_ptr] not in [' ','\n']:
                         end_ptr += 1
-                    chord = chords[chord_ptr:end_ptr].replace(' ','')
+                    chord = chords[chord_ptr:end_ptr].strip()
                     if chord:
                         chord_ptr = end_ptr
                     else:
@@ -112,7 +91,6 @@ class Song:
                         if 'N' not in chord.upper() or 'C' not in chord.upper():
                             lyrics.append(Word(chord,None,'postline'))
             elif len(words) > len(chords):
-                #TODO it's wrongly assigning C6 to the next word
                 remaining = words[word_ptr:].split()
 
                 new_lines = '\n' * words.count('\n')
@@ -157,13 +135,9 @@ class Song:
             print('unsuccessful tab: ' + str(match_percentage) + '%')
             return None
         else:
-            self.print_lyrics(lyrics)
             return lyrics
 
     def print_lyrics(self, lyrics):
-        #for lyric in lyrics:
-        #    lyric.print()
-
         word_offset = 0
         chord_line = [' '] * 100
         word_line = []
@@ -172,12 +146,8 @@ class Song:
             chord = lyric.chord + ' ' if lyric.chord else ''
             word = lyric.word
             c_length = len(chord)
-
-            #print(chord)
-            #print(word)
             
             if lyric.pos == 'preline':
-                chord = lyric.chord
                 c_length = len(chord)
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
@@ -197,8 +167,6 @@ class Song:
                     word_line.append(' ' * c_length)
                 word_offset += new_len
             elif lyric.pos == 'postline':
-                #withhold the value of the \n character
-                #word_offset -= 1
                 for i in range(c_length):
                     chord_line[word_offset + i] = chord[i]
                 word_offset += c_length
