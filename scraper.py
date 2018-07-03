@@ -9,12 +9,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-#from song import Song
+from song import Song
 
 ''' 
 Global variables 
 '''
-browser = None
+BROWSER = None
+DEBUG_MODE = True
 LONG_STALL = 100
 SHORT_STALL = 50
 WAIT_STALL = 10
@@ -28,11 +29,11 @@ song object scraped from the tab page.
 @param tab_index: Index of the current tab to be scraped in the table on the website
 '''
 def first_scrape(songs, artist, tab_index):
-    global browser
+    global BROWSER
 
-    browser.set_page_load_timeout(SHORT_STALL)
+    BROWSER.set_page_load_timeout(SHORT_STALL)
     tab_list_class_name = '_1iQi2'
-    tabs = browser.find_elements_by_class_name(tab_list_class_name)
+    tabs = BROWSER.find_elements_by_class_name(tab_list_class_name)
     tab_info = tabs[tab_index]
     title = tab_info.text
     #remove extra formatting from beginning and end of tab header
@@ -45,16 +46,16 @@ def first_scrape(songs, artist, tab_index):
         print('***Scraping ukulele tab for ' + title + ' by ' + artist + '***')
         song_link = tab_info.find_element_by_partial_link_text(title)
         song_link.click()
-        wait = WebDriverWait(browser,WAIT_STALL)
+        wait = WebDriverWait(BROWSER,WAIT_STALL)
         wait.until(EC.url_contains('tab'))
         tab_class_name = '_1YgOS'
-        tab_element = browser.find_element_by_class_name(tab_class_name)
+        tab_element = BROWSER.find_element_by_class_name(tab_class_name)
         tab = tab_element.text
         song = Song(title,tab)
         if not song.is_valid():
             print('\tScrape failed for ' + title)
-        browser.back()
-        wait = WebDriverWait(browser,WAIT_STALL)
+        BROWSER.back()
+        wait = WebDriverWait(BROWSER,WAIT_STALL)
         wait.until(EC.url_contains('search'))
     else:
         print('Skipping tab for ' + title + ' by ' + artist + ': ', end='')
@@ -74,11 +75,14 @@ and is helpful for debugging with visual cues.
 @param url: Url link that the browser redirects to
 '''
 def initialize_browser(url):
+    global DEBUG_MODE
+
     print('Initializing browser...')
     options = webdriver.ChromeOptions()
     prefs = {'profile.managed_default_content_settings.images':2}
     options.add_experimental_option('prefs',prefs)
-    options.add_argument('headless')
+    if not DEBUG_MODE:
+        options.add_argument('headless')
     browser = webdriver.Chrome(chrome_options=options)
     browser.set_page_load_timeout(LONG_STALL)
     browser.get(url)
@@ -92,14 +96,14 @@ so buttons exist at the bottom of the page with the page numbers
 @param page: The page number that the desired tab is located in, 1-indexed
 '''
 def navigate_to_page(page):
-    global browser
+    global BROWSER
 
     if page > 1:
         print('Navigating to page ' + str(page))
-        browser.set_page_load_timeout(LONG_STALL)
-        next = browser.find_element_by_link_text(str(page))
+        BROWSER.set_page_load_timeout(LONG_STALL)
+        next = BROWSER.find_element_by_link_text(str(page))
         next.click()
-        wait = WebDriverWait(browser,WAIT_STALL)
+        wait = WebDriverWait(BROWSER,WAIT_STALL)
         wait.until(EC.url_contains('page=' + str(page)))
 
 '''
@@ -113,11 +117,11 @@ but if this fails, calls itself again.
 @param tab_index: Index of the current tab to be scraped in the table on the website
 '''
 def recursive_scrape(songs, artist, page, tab_index):
-    global browser
+    global BROWSER
 
     print('Closing browser')
-    browser.close()
-    browser = initialize_browser('https://www.ultimate-guitar.com/explore')
+    BROWSER.close()
+    BROWSER = initialize_browser('https://www.ultimate-guitar.com/explore')
     search_for_artist_tabs(artist)
     navigate_to_page(page)
     
@@ -149,11 +153,13 @@ collection of tabs associated with the artist.
 @param artist: The name of the artist
 '''
 def search_for_artist_tabs(artist):
+    global BROWSER
+    
     print('Searching for artist ' + artist)
-    tab_search_bar = browser.find_element_by_tag_name('input')
+    tab_search_bar = BROWSER.find_element_by_tag_name('input')
     tab_search_bar.clear()
     tab_search_bar.send_keys(artist + Keys.RETURN)
-    wait = WebDriverWait(browser,WAIT_STALL)
+    wait = WebDriverWait(BROWSER,WAIT_STALL)
     wait.until(EC.url_contains('search'))
 
 '''
@@ -165,26 +171,26 @@ A shelf is a way to store a state of variables from a python script in a NoSQL m
 with the data for the variables accessible by calling their associated key.
 '''
 def main():
-    global browser
-    artists = ['Julia Nunes', 'Conan Gray', 'Cavetown'] #TODO to be replaced with user prompted artist names
+    global BROWSER
+    artists = ['Young the Giant', 'Julia Nunes', 'Conan Gray', 'Remo Drive', 'Rex Orange County'] #TODO to be replaced with user prompted artist names
     num_songs = 0
     training_data_ptr = 0
     seed_indices = []
     data_shelf = shelve.open('seeds')
     tab_training_data = open('tab_corpus.txt','w')
-    browser = initialize_browser('https://www.ultimate-guitar.com/explore')
+    BROWSER = initialize_browser('https://www.ultimate-guitar.com/explore')
 
     for artist in artists:
         songs = set()
-        browser.set_page_load_timeout(LONG_STALL)
+        BROWSER.set_page_load_timeout(LONG_STALL)
         search_for_artist_tabs(artist)
-        num_tabs = browser.find_element_by_class_name('_2PyWj')
+        num_tabs = BROWSER.find_element_by_class_name('_2PyWj')
         num_tabs = int(num_tabs.text.split()[0])
         last_page = math.ceil(num_tabs/50) + 1
 
         for page in range(1, last_page):
             navigate_to_page(page)
-            num_tabs_on_page = len(browser.find_elements_by_class_name('_1iQi2'))
+            num_tabs_on_page = len(BROWSER.find_elements_by_class_name('_1iQi2'))
             
             for tab in range(1, num_tabs_on_page):
                 try:
@@ -205,8 +211,7 @@ def main():
     print('Closing browser')
     data_shelf.close()
     tab_training_data.close()
-    browser.close()
-    num_songs = len(training_data)
+    BROWSER.close()
     print('Successfully scraped ' + str(num_songs) + ' songs!')
     if num_songs < 50:
         print('\tTry to scrape at least 50 songs for the best tab generation results!')
