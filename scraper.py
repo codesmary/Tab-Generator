@@ -9,7 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from song import Song
+#from song import Song
 
 ''' 
 Global variables 
@@ -51,7 +51,7 @@ def first_scrape(songs, artist, tab_index):
         tab_element = browser.find_element_by_class_name(tab_class_name)
         tab = tab_element.text
         song = Song(title,tab)
-        if not song:
+        if not song.is_valid():
             print('\tScrape failed for ' + title)
         browser.back()
         wait = WebDriverWait(browser,WAIT_STALL)
@@ -166,9 +166,12 @@ with the data for the variables accessible by calling their associated key.
 '''
 def main():
     global browser
-    artists = ['Julia Nunes', 'Conan Gray'] #TODO to be replaced with user prompted artist names
-    training_data = []
-    data_shelf = shelve.open('tab_data')
+    artists = ['Julia Nunes', 'Conan Gray', 'Cavetown'] #TODO to be replaced with user prompted artist names
+    num_songs = 0
+    training_data_ptr = 0
+    seed_indices = []
+    data_shelf = shelve.open('seeds')
+    tab_training_data = open('tab_corpus.txt','w')
     browser = initialize_browser('https://www.ultimate-guitar.com/explore')
 
     for artist in artists:
@@ -190,15 +193,23 @@ def main():
                     print(e)
                     song = recursive_scrape(songs,artist,page,tab)
                 
-                if song:
+                if song and song.is_valid():
+                    num_songs += 1
                     songs.add(song.title)
-                    training_data.append(song)
+                    new_tab = song.get_song()
+                    seed_indices.append(training_data_ptr)
+                    training_data_ptr += len(new_tab)
+                    tab_training_data.write(new_tab)
 
-    data_shelf['training_data'] = training_data
-    data_shelf.close()
+    data_shelf['seed_indices'] = seed_indices
     print('Closing browser')
+    data_shelf.close()
+    tab_training_data.close()
     browser.close()
-    print('Successfully scraped ' + str(len(training_data)) + ' songs!')
+    num_songs = len(training_data)
+    print('Successfully scraped ' + str(num_songs) + ' songs!')
+    if num_songs < 50:
+        print('\tTry to scrape at least 50 songs for the best tab generation results!')
     print('Stored as list of Song objects under the \'training_data\' key in the \'tab_data\' shelf')
 
 if __name__ == '__main__':
