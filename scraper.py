@@ -7,8 +7,9 @@ import shelve
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from song import Song
 
 ''' 
@@ -86,6 +87,20 @@ def initialize_browser(url):
     browser = webdriver.Chrome(chrome_options=options)
     browser.set_page_load_timeout(LONG_STALL)
     browser.get(url)
+    browser = close_ad(browser)
+    return browser
+
+def close_ad(browser):
+    print('Closing ad')
+    try:
+        ad = browser.find_element_by_class_name('countdown')
+        ad_width = ad.size['width']
+        ad_height = ad.size['height']
+        ActionChains(browser).move_to_element_with_offset(ad,ad_width - 10,ad_height/4).perform()
+        ActionChains(browser).click().perform()
+    except:
+        pass
+
     return browser
 
 '''
@@ -154,13 +169,23 @@ collection of tabs associated with the artist.
 '''
 def search_for_artist_tabs(artist):
     global BROWSER
-    
+
     print('Searching for artist ' + artist)
+    change_search_criteria_to_artist()
     tab_search_bar = BROWSER.find_element_by_tag_name('input')
     tab_search_bar.clear()
     tab_search_bar.send_keys(artist + Keys.RETURN)
     wait = WebDriverWait(BROWSER,WAIT_STALL)
     wait.until(EC.url_contains('search'))
+
+def change_search_criteria_to_artist():
+    global BROWSER
+    
+    print('Changing search criteria to artist')
+    drop_down_menu = BROWSER.find_element_by_class_name('_1487a')
+    ActionChains(BROWSER).move_to_element(drop_down_menu).perform()
+    ActionChains(BROWSER).move_by_offset(0,75).perform()
+    ActionChains(BROWSER).click().perform()
 
 '''
 Aggregator of tab data for a number of artists. Searches for all of the artists on
@@ -172,7 +197,7 @@ with the data for the variables accessible by calling their associated key.
 '''
 def main():
     global BROWSER
-    artists = ['Young the Giant', 'Julia Nunes', 'Conan Gray', 'Remo Drive', 'Rex Orange County'] #TODO to be replaced with user prompted artist names
+    artists = ['Young the Giant', 'Julia Nunes', 'Conan Gray', 'Remo Drive', 'Rex Orange County']
     num_songs = 0
     training_data_ptr = 0
     seed_indices = []
