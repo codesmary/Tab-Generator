@@ -37,9 +37,7 @@ def first_scrape(songs, artist, tab_index):
     tabs = BROWSER.find_elements_by_class_name(tab_list_class_name)
     tab_info = tabs[tab_index]
     title = tab_info.text
-    #remove extra formatting from beginning and end of tab header
-    #to retrieve raw song title
-    title = remove(title,r'((^(' + artist + r')+(\n)+)|((^(Misc Unsigned Bands)+(\n)+)*(' + artist + r'\s[-]\s)+)|((.*?((ft.|feat.) '+ artist + r')))+(\n)+)')
+    #remove extra formatting from end of tab header to retrieve raw song title
     title = remove(title,r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
     #only scrape tabs that have not been previously scraped and are
     #ukulele tabs
@@ -77,6 +75,7 @@ and is helpful for debugging with visual cues.
 '''
 def initialize_browser(url):
     global DEBUG_MODE
+    global BROWSER
 
     print('Initializing browser...')
     options = webdriver.ChromeOptions()
@@ -87,21 +86,21 @@ def initialize_browser(url):
     browser = webdriver.Chrome(chrome_options=options)
     browser.set_page_load_timeout(LONG_STALL)
     browser.get(url)
-    browser = close_ad(browser)
-    return browser
+    BROWSER = browser
+    close_ad()
 
-def close_ad(browser):
+def close_ad():
+    global BROWSER
+
     print('Closing ad')
     try:
-        ad = browser.find_element_by_class_name('countdown')
+        ad = BROWSER.find_element_by_class_name('countdown')
         ad_width = ad.size['width']
         ad_height = ad.size['height']
-        ActionChains(browser).move_to_element_with_offset(ad,ad_width - 10,ad_height/4).perform()
-        ActionChains(browser).click().perform()
+        ActionChains(BROWSER).move_to_element_with_offset(ad, ad_width - 10, ad_height/4).perform()
+        ActionChains(BROWSER).click().perform()
     except:
-        pass
-
-    return browser
+        pasS
 
 '''
 If the page to be navigated to to retrieve the tab is greater than one,
@@ -136,7 +135,7 @@ def recursive_scrape(songs, artist, page, tab_index):
 
     print('Closing browser')
     BROWSER.close()
-    BROWSER = initialize_browser('https://www.ultimate-guitar.com/explore')
+    initialize_browser('https://www.ultimate-guitar.com/explore')
     search_for_artist_tabs(artist)
     navigate_to_page(page)
     
@@ -150,7 +149,7 @@ def recursive_scrape(songs, artist, page, tab_index):
 
 '''
 Returns the tab_header string, with all matches for the filler regex removed.
-@param tab_header: The string scraped from the tabs page, contains the song name, the tab type, and possibly the rating and artist name
+@param tab_header: The string scraped from the tabs page, contains the song name, the tab type, and possibly the rating
 @param filler: Regex for removing the noise in tab_header besides the song name
 '''
 def remove(tab_header, filler):
@@ -171,12 +170,34 @@ def search_for_artist_tabs(artist):
     global BROWSER
 
     print('Searching for artist ' + artist)
+
     change_search_criteria_to_artist()
+    
     tab_search_bar = BROWSER.find_element_by_tag_name('input')
     tab_search_bar.clear()
     tab_search_bar.send_keys(artist + Keys.RETURN)
     wait = WebDriverWait(BROWSER,WAIT_STALL)
     wait.until(EC.url_contains('search'))
+
+    try:
+        #this is the most relatable variable name
+        invalid_artist = '_2doOH'
+        BROWSER.find_element_by_class_name(invalid_artist)
+        raise ValueError('The artist ' + artist + ' does not exist in the Ultimate Guitar database')
+    except:
+        pass
+
+    #this is based on the assumption that the first band will
+    #always be the most relevant, as Ultimate Guitar seems to rank
+    #the resulting links in order of best match
+    all_artist_matches = BROWSER.find_elements_by_class_name('_3-q_x')
+    #testing output
+    print('artist output')
+    for artist in all_artist_matches:
+        print(artist)
+    ###
+    desired_artist = all_artist_matches[1]
+    desired_artist.click()
 
 def change_search_criteria_to_artist():
     global BROWSER
@@ -203,12 +224,18 @@ def main():
     seed_indices = []
     data_shelf = shelve.open('seeds')
     tab_training_data = open('tab_corpus.txt','w')
-    BROWSER = initialize_browser('https://www.ultimate-guitar.com/explore')
+    initialize_browser('https://www.ultimate-guitar.com/explore')
 
     for artist in artists:
         songs = set()
         BROWSER.set_page_load_timeout(LONG_STALL)
-        search_for_artist_tabs(artist)
+        
+        try:
+            search_for_artist_tabs(artist)
+        except ValueError as ve:
+            print(ve)
+            continue
+
         num_tabs = BROWSER.find_element_by_class_name('_2PyWj')
         num_tabs = int(num_tabs.text.split()[0])
         last_page = math.ceil(num_tabs/50) + 1
@@ -216,6 +243,8 @@ def main():
         for page in range(1, last_page):
             navigate_to_page(page)
             num_tabs_on_page = len(BROWSER.find_elements_by_class_name('_1iQi2'))
+            #find the index of the one that says "chords & tabs"
+            #start iterating at the row after it
             
             for tab in range(1, num_tabs_on_page):
                 try:
