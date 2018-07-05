@@ -55,7 +55,7 @@ def first_scrape(songs, artist, tab_index):
             print('\tScrape failed for ' + title)
         BROWSER.back()
         wait = WebDriverWait(BROWSER,WAIT_STALL)
-        wait.until(EC.url_contains('search'))
+        wait.until(EC.url_contains('artist'))
     else:
         print('Skipping tab for ' + title + ' by ' + artist + ': ', end='')
         if title in songs:
@@ -100,7 +100,7 @@ def close_ad():
         ActionChains(BROWSER).move_to_element_with_offset(ad, ad_width - 10, ad_height/4).perform()
         ActionChains(BROWSER).click().perform()
     except:
-        pasS
+        pass
 
 '''
 If the page to be navigated to to retrieve the tab is greater than one,
@@ -190,13 +190,7 @@ def search_for_artist_tabs(artist):
     #this is based on the assumption that the first band will
     #always be the most relevant, as Ultimate Guitar seems to rank
     #the resulting links in order of best match
-    all_artist_matches = BROWSER.find_elements_by_class_name('_3-q_x')
-    #testing output
-    print('artist output')
-    for artist in all_artist_matches:
-        print(artist)
-    ###
-    desired_artist = all_artist_matches[1]
+    desired_artist = BROWSER.find_element_by_class_name('_33Vdc')
     desired_artist.click()
 
 def change_search_criteria_to_artist():
@@ -207,6 +201,17 @@ def change_search_criteria_to_artist():
     ActionChains(BROWSER).move_to_element(drop_down_menu).perform()
     ActionChains(BROWSER).move_by_offset(0,75).perform()
     ActionChains(BROWSER).click().perform()
+
+def has_next_page(page):
+    valid_page = True
+    if page != 1:
+        try:
+            next_button = BROWSER.find_element_by_link_text('NEXT')
+            valid_page = False
+        except:
+            pass
+
+    return valid_page
 
 '''
 Aggregator of tab data for a number of artists. Searches for all of the artists on
@@ -236,22 +241,24 @@ def main():
             print(ve)
             continue
 
-        num_tabs = BROWSER.find_element_by_class_name('_2PyWj')
-        num_tabs = int(num_tabs.text.split()[0])
-        last_page = math.ceil(num_tabs/50) + 1
-
-        for page in range(1, last_page):
+        page = 1
+        while has_next_page(page):
             navigate_to_page(page)
-            num_tabs_on_page = len(BROWSER.find_elements_by_class_name('_1iQi2'))
-            #find the index of the one that says "chords & tabs"
-            #start iterating at the row after it
+            tabs = BROWSER.find_elements_by_class_name('_1iQi2')
+            num_tabs_on_page = len(tabs)
             
-            for tab in range(1, num_tabs_on_page):
+            starting_tab_index = 0
+            for tab_index in range(num_tabs_on_page):
+                starting_tab_index += 1
+                if 'CHORDS & TABS' in tabs[tab_index].text:
+                    break
+
+            for tab_index in range(starting_tab_index, num_tabs_on_page):
                 try:
-                    song = first_scrape(songs,artist,tab)
+                    song = first_scrape(songs,artist,tab_index)
                 except Exception as e:
                     print(e)
-                    song = recursive_scrape(songs,artist,page,tab)
+                    song = recursive_scrape(songs,artist,page,tab_index)
                 
                 if song and song.is_valid():
                     num_songs += 1
@@ -260,6 +267,8 @@ def main():
                     seed_indices.append(training_data_ptr)
                     training_data_ptr += len(new_tab)
                     tab_training_data.write(new_tab)
+
+            page += 1
 
     data_shelf['seed_indices'] = seed_indices
     print('Closing browser')
