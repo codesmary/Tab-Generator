@@ -204,12 +204,11 @@ def change_search_criteria_to_artist():
 
 def has_next_page(page):
     valid_page = True
-    if page != 1:
+    if page > 1:
         try:
-            next_button = BROWSER.find_element_by_link_text('NEXT')
-            valid_page = False
+            BROWSER.find_element_by_link_text('NEXT')
         except:
-            pass
+            valid_page = False
 
     return valid_page
 
