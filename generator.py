@@ -95,5 +95,5 @@ print_callback = LambdaCallback(on_epoch_end=on_epoch_end)
 #begin training
 model.fit(x, y,
           batch_size=128,
-          epochs=60,
+          epochs=500,
           callbacks=[print_callback])
