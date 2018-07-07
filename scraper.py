@@ -154,6 +154,14 @@ def navigate_to_page(page):
         wait.until(EC.url_contains('page=' + str(page)))
 
 '''
+Returns a list of artist names, prompted from the user.
+'''
+def prompt_user_for_artists():
+    artists = re.split(', |,', input('Enter a comma delimited list of the artists you want to scrape ukulele songs from!\n'))
+    print('Great! Searching for ' + ', '.join(artists))
+    return artists
+
+'''
 Intended to be called when the first scrape fails due to a given exception. Resets 
 the browser, searches for the artist and goes to the correct page of tabs left off 
 on, and attempts to run a simple scrape by calling the first_scrape function, 
@@ -239,12 +247,13 @@ of a tab.
 '''
 def main():
     global BROWSER
-    artists = ['Young the Giant', 'Julia Nunes', 'Conan Gray', 'Remo Drive', 'Rex Orange County']
     num_songs = 0
     training_data_ptr = 0
     seed_indices = []
     data_shelf = shelve.open('seeds')
     tab_training_data = open('tab_corpus.txt','w')
+
+    artists = prompt_user_for_artists()
     initialize_browser('https://www.ultimate-guitar.com/explore')
 
     for artist in artists:
