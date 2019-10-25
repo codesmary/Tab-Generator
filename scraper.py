@@ -22,6 +22,40 @@ SHORT_STALL = 50
 WAIT_STALL = 10
 
 '''
+Changes the Ultimate Guitar search bar drop down menu to 'Artists' option instead
+of 'Tabs'. This ensures the tab discography scraped is composed of only songs by
+the user-selected artist.
+pre: Assumes the 'Artists' option is 75 px below the drop down arrow for search
+type selection
+'''
+def change_search_criteria_to_artists():
+    global BROWSER
+    
+    print('Changing search criteria to artists')
+    drop_down_menu = BROWSER.find_element_by_class_name('_1487a')
+    ActionChains(BROWSER).move_to_element(drop_down_menu).perform()
+    ActionChains(BROWSER).move_by_offset(0,75).perform()
+    ActionChains(BROWSER).click().perform()
+
+'''
+Closes the pop-up ad on the explore page, if present. Assumes the 'x' button is in 
+the upper right corner.
+pre: The browser is navigated to the https://www.ultimate-guitar.com/explore page
+'''
+def close_ad():
+    global BROWSER
+
+    print('Closing ad')
+    try:
+        ad = BROWSER.find_element_by_class_name('countdown')
+        ad_width = ad.size['width']
+        ad_height = ad.size['height']
+        ActionChains(BROWSER).move_to_element_with_offset(ad, ad_width - 10, ad_height/4).perform()
+        ActionChains(BROWSER).click().perform()
+    except:
+        pass
+
+'''
 To be called from the tabs page for a given artist. Clicks on the link for the
 song with a given tab index, returns back to the tab page, and returns the 
 song object scraped from the tab page.
@@ -36,11 +70,7 @@ def first_scrape(songs, artist, tab_index):
     tab_list_class_name = '_1iQi2'
     tabs = BROWSER.find_elements_by_class_name(tab_list_class_name)
     tab_info = tabs[tab_index]
-    title = tab_info.text
-    #remove extra formatting from end of tab header to retrieve raw song title
-    title = remove(title,r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
-    #only scrape tabs that have not been previously scraped and are
-    #ukulele tabs
+    title = remove(tab_info.text, r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
     if title not in songs and 'Ukulele' in tab_info.text:
         print('***Scraping ukulele tab for ' + title + ' by ' + artist + '***')
         song_link = tab_info.find_element_by_partial_link_text(title)
@@ -67,6 +97,22 @@ def first_scrape(songs, artist, tab_index):
     return song
 
 '''
+Determines if another page exists after the current page of tabs.
+pre: The browser is directed to the artist's discography of tabs
+'''
+def has_next_page(page):
+    global BROWSER
+    
+    valid_page = True
+    if page > 1:
+        try:
+            BROWSER.find_element_by_link_text('NEXT')
+        except:
+            valid_page = False
+
+    return valid_page
+
+'''
 Returns a selenium webdriver run in Google Chrome, populated with
 the url. The browser doesn't load images or present a gui to speed
 up the web scraping. Removing the headless argument will return a gui 
@@ -89,19 +135,6 @@ def initialize_browser(url):
     BROWSER = browser
     close_ad()
 
-def close_ad():
-    global BROWSER
-
-    print('Closing ad')
-    try:
-        ad = BROWSER.find_element_by_class_name('countdown')
-        ad_width = ad.size['width']
-        ad_height = ad.size['height']
-        ActionChains(BROWSER).move_to_element_with_offset(ad, ad_width - 10, ad_height/4).perform()
-        ActionChains(BROWSER).click().perform()
-    except:
-        pass
-
 '''
 If the page to be navigated to to retrieve the tab is greater than one,
 presses the appropriate button and waits until the page loads
@@ -119,6 +152,14 @@ def navigate_to_page(page):
         next.click()
         wait = WebDriverWait(BROWSER,WAIT_STALL)
         wait.until(EC.url_contains('page=' + str(page)))
+
+'''
+Returns a list of artist names, prompted from the user.
+'''
+def prompt_user_for_artists():
+    artists = re.split(', |,', input('Enter a comma delimited list of the artists you want to scrape ukulele songs from!\n'))
+    print('Great! Searching for ' + ', '.join(artists))
+    return artists
 
 '''
 Intended to be called when the first scrape fails due to a given exception. Resets 
@@ -164,6 +205,7 @@ def remove(tab_header, filler):
 '''
 Clears the website's search bar, and navigates the browser to the
 collection of tabs associated with the artist.
+pre: Assumes the resulting list of artists is sorted by relevance to search query
 @param artist: The name of the artist
 '''
 def search_for_artist_tabs(artist):
@@ -171,7 +213,7 @@ def search_for_artist_tabs(artist):
 
     print('Searching for artist ' + artist)
 
-    change_search_criteria_to_artist()
+    change_search_criteria_to_artists()
     
     tab_search_bar = BROWSER.find_element_by_tag_name('input')
     tab_search_bar.clear()
@@ -187,48 +229,31 @@ def search_for_artist_tabs(artist):
     except:
         pass
 
-    #this is based on the assumption that the first band will
-    #always be the most relevant, as Ultimate Guitar seems to rank
-    #the resulting links in order of best match
     desired_artist = BROWSER.find_element_by_class_name('_33Vdc')
     desired_artist.click()
-
-def change_search_criteria_to_artist():
-    global BROWSER
-    
-    print('Changing search criteria to artist')
-    drop_down_menu = BROWSER.find_element_by_class_name('_1487a')
-    ActionChains(BROWSER).move_to_element(drop_down_menu).perform()
-    ActionChains(BROWSER).move_by_offset(0,75).perform()
-    ActionChains(BROWSER).click().perform()
-
-def has_next_page(page):
-    valid_page = True
-    if page != 1:
-        try:
-            next_button = BROWSER.find_element_by_link_text('NEXT')
-            valid_page = False
-        except:
-            pass
-
-    return valid_page
 
 '''
 Aggregator of tab data for a number of artists. Searches for all of the artists on
 Ultimate Guitar, a website for storing musical tabs. Iterates through their collection
-of songs, which can span multiple pages, and adds these song objects to a training_data 
-list. This list is stored in a shelf called "tab_data" under the key "training_data".
-A shelf is a way to store a state of variables from a python script in a NoSQL manner,
-with the data for the variables accessible by calling their associated key.
+of songs, which can span multiple pages, and appends these tabs to a tab_training_data 
+text file. The location of the tab titles in the file text is stored in a shelf called 
+"seed_indices" under the key "seeds". The intention is to scrape these tabs from Ultimate 
+Guitar in order for the "tab_corpus.txt" file to be used as training data. After the 
+LSTM has been trained on this collection of tabs, it is recommended to randomly select 
+one of the integer values stored in the "seeds" list to retrieve a string from the 
+"tab_corpus.txt" file to be used as a starting point for text generation, as this will 
+guarantee the generated output begins with a song title, generally having the appearance 
+of a tab.
 '''
 def main():
     global BROWSER
-    artists = ['Young the Giant', 'Julia Nunes', 'Conan Gray', 'Remo Drive', 'Rex Orange County']
     num_songs = 0
     training_data_ptr = 0
     seed_indices = []
     data_shelf = shelve.open('seeds')
     tab_training_data = open('tab_corpus.txt','w')
+
+    artists = prompt_user_for_artists()
     initialize_browser('https://www.ultimate-guitar.com/explore')
 
     for artist in artists:
