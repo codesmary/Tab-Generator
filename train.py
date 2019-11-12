@@ -14,7 +14,6 @@ def train(args):
     if args.log_dir is not None:
         train_logger = tb.SummaryWriter(path.join(args.log_dir, 'train'), flush_secs=1)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(args.learningrate), weight_decay=0.001)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
     loss = nn.CrossEntropyLoss()
     train_dataset = load_data('tab_corpus.txt')
     model.train()
