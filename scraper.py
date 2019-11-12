@@ -22,22 +22,6 @@ SHORT_STALL = 50
 WAIT_STALL = 10
 
 '''
-Changes the Ultimate Guitar search bar drop down menu to 'Artists' option instead
-of 'Tabs'. This ensures the tab discography scraped is composed of only songs by
-the user-selected artist.
-pre: Assumes the 'Artists' option is 75 px below the drop down arrow for search
-type selection
-'''
-def change_search_criteria_to_artists():
-    global BROWSER
-    
-    print('Changing search criteria to artists')
-    drop_down_menu = BROWSER.find_element_by_class_name('_1487a')
-    ActionChains(BROWSER).move_to_element(drop_down_menu).perform()
-    ActionChains(BROWSER).move_by_offset(0,75).perform()
-    ActionChains(BROWSER).click().perform()
-
-'''
 Closes the pop-up ad on the explore page, if present. Assumes the 'x' button is in 
 the upper right corner.
 pre: The browser is navigated to the https://www.ultimate-guitar.com/explore page
@@ -67,7 +51,7 @@ def first_scrape(songs, artist, tab_index):
     global BROWSER
 
     BROWSER.set_page_load_timeout(SHORT_STALL)
-    tab_list_class_name = '_1iQi2'
+    tab_list_class_name = 'MbKPm'
     tabs = BROWSER.find_elements_by_class_name(tab_list_class_name)
     tab_info = tabs[tab_index]
     title = remove(tab_info.text, r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
@@ -77,7 +61,7 @@ def first_scrape(songs, artist, tab_index):
         song_link.click()
         wait = WebDriverWait(BROWSER,WAIT_STALL)
         wait.until(EC.url_contains('tab'))
-        tab_class_name = '_1YgOS'
+        tab_class_name = 'WcX3E'
         tab_element = BROWSER.find_element_by_class_name(tab_class_name)
         tab = tab_element.text
         song = Song(title,tab)
@@ -213,8 +197,6 @@ def search_for_artist_tabs(artist):
 
     print('Searching for artist ' + artist)
 
-    change_search_criteria_to_artists()
-    
     tab_search_bar = BROWSER.find_element_by_tag_name('input')
     tab_search_bar.clear()
     tab_search_bar.send_keys(artist + Keys.RETURN)
@@ -229,7 +211,7 @@ def search_for_artist_tabs(artist):
     except:
         pass
 
-    desired_artist = BROWSER.find_element_by_class_name('_33Vdc')
+    desired_artist = BROWSER.find_element_by_class_name('fpL8S')
     desired_artist.click()
 
 '''
@@ -269,7 +251,7 @@ def main():
         page = 1
         while has_next_page(page):
             navigate_to_page(page)
-            tabs = BROWSER.find_elements_by_class_name('_1iQi2')
+            tabs = BROWSER.find_elements_by_class_name('MbKPm')
             num_tabs_on_page = len(tabs)
             
             starting_tab_index = 0
