@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from tcn import load_model
 import loader
 import torch
