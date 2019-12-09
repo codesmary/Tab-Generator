@@ -51,17 +51,17 @@ def first_scrape(songs, artist, tab_index):
     global BROWSER
 
     BROWSER.set_page_load_timeout(SHORT_STALL)
-    tab_list_class_name = 'MbKPm'
+    tab_list_class_name = 'pZcWD'
     tabs = BROWSER.find_elements_by_class_name(tab_list_class_name)
     tab_info = tabs[tab_index]
     title = remove(tab_info.text, r'(\s*[(\*\n]+[\s\S]*)|(\n+[\s\S]*)')
-    if title not in songs and 'Ukulele' in tab_info.text:
-        print('***Scraping ukulele tab for ' + title + ' by ' + artist + '***')
+    if title not in songs and 'Chords' in tab_info.text:
+        print('***Scraping tab for ' + title + ' by ' + artist + '***')
         song_link = tab_info.find_element_by_partial_link_text(title)
         song_link.click()
         wait = WebDriverWait(BROWSER,WAIT_STALL)
         wait.until(EC.url_contains('tab'))
-        tab_class_name = 'WcX3E'
+        tab_class_name = '_3zygO'
         tab_element = BROWSER.find_element_by_class_name(tab_class_name)
         tab = tab_element.text
         song = Song(title,tab)
@@ -74,8 +74,8 @@ def first_scrape(songs, artist, tab_index):
         print('Skipping tab for ' + title + ' by ' + artist + ': ', end='')
         if title in songs:
             print('Scraped identical song')
-        elif not 'Ukulele' in tab_info.text:
-            print('Not a ukulele tab')
+        elif not 'Chords' in tab_info.text:
+            print('Not a guitar tab')
         song = None
 
     return song
@@ -113,7 +113,7 @@ def initialize_browser(url):
     options.add_experimental_option('prefs',prefs)
     if not DEBUG_MODE:
         options.add_argument('headless')
-    browser = webdriver.Chrome(chrome_options=options)
+    browser = webdriver.Chrome(executable_path="./chromedriver", chrome_options=options)
     browser.set_page_load_timeout(LONG_STALL)
     browser.get(url)
     BROWSER = browser
@@ -141,7 +141,7 @@ def navigate_to_page(page):
 Returns a list of artist names, prompted from the user.
 '''
 def prompt_user_for_artists():
-    artists = re.split(', |,', input('Enter a comma delimited list of the artists you want to scrape ukulele songs from!\n'))
+    artists = re.split(', |,', input('Enter a comma delimited list of the artists you want to scrape songs from!\n'))
     print('Great! Searching for ' + ', '.join(artists))
     return artists
 
@@ -211,7 +211,7 @@ def search_for_artist_tabs(artist):
     except:
         pass
 
-    desired_artist = BROWSER.find_element_by_class_name('fpL8S')
+    desired_artist = BROWSER.find_element_by_class_name('wSTi6')
     desired_artist.click()
 
 '''
@@ -251,7 +251,7 @@ def main():
         page = 1
         while has_next_page(page):
             navigate_to_page(page)
-            tabs = BROWSER.find_elements_by_class_name('MbKPm')
+            tabs = BROWSER.find_elements_by_class_name('pZcWD')
             num_tabs_on_page = len(tabs)
             
             starting_tab_index = 0
